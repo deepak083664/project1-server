@@ -1,0 +1,27 @@
+{
+  "name": "node-express-mongo-starter",
+  "version": "1.0.0",
+  "description": "A clean starter template with Node.js, Express, and MongoDB",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.3.4",
+    "multer": "^2.1.0",
+    "nodemailer": "^8.0.1",
+    "pdfkit": "^0.17.2",
+    "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
