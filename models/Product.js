@@ -84,4 +84,8 @@ const productSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+// Indexes for recommendation and sorting optimization
+productSchema.index({ category: 1, averageRating: -1 });
+productSchema.index({ category: 1, numReviews: -1 });
+
 module.exports = mongoose.model('Product', productSchema);

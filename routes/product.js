@@ -4,17 +4,20 @@ const {
     createProduct,
     getProducts,
     getProductById,
-    getProductById,
     updateProduct,
     deleteProduct,
     createProductReview,
-    deleteReview
+    deleteReview,
+    getRecommendedProducts,
+    getPopularProducts
 } = require('../controllers/productController');
-const { protect, admin } = require('../middleware/authMiddleware'); // Updated to use authMiddleware if that exists. Let's make sure.
+const { protect, admin } = require('../middleware/auth'); // Updated to use authMiddleware if that exists. Let's make sure.
 
 // Public routes
+router.get('/popular/top', getPopularProducts); // Avoid matching /:id route
 router.get('/', getProducts);
 router.get('/:id', getProductById);
+router.get('/:id/recommendations', getRecommendedProducts);
 
 // Admin restricted routes
 router.post('/', protect, admin, createProduct);

@@ -5,7 +5,7 @@ const asyncHandler = require('../middleware/asyncHandler');
 // @route   POST /api/coupons
 // @access  Private/Admin
 const createCoupon = asyncHandler(async (req, res) => {
-    const { code, discountType, discountValue, expiryDate, minOrderAmount, isActive } = req.body;
+    const { code, discountType, discountValue, expiryDate, minOrderAmount, usageLimit, isActive } = req.body;
 
     const couponExists = await Coupon.findOne({ code });
 
@@ -20,6 +20,7 @@ const createCoupon = asyncHandler(async (req, res) => {
         discountValue,
         expiryDate,
         minOrderAmount,
+        usageLimit,
         isActive
     });
 
@@ -46,6 +47,7 @@ const updateCoupon = asyncHandler(async (req, res) => {
         coupon.discountValue = req.body.discountValue !== undefined ? req.body.discountValue : coupon.discountValue;
         coupon.expiryDate = req.body.expiryDate || coupon.expiryDate;
         coupon.minOrderAmount = req.body.minOrderAmount !== undefined ? req.body.minOrderAmount : coupon.minOrderAmount;
+        coupon.usageLimit = req.body.usageLimit !== undefined ? req.body.usageLimit : coupon.usageLimit;
         coupon.isActive = req.body.isActive !== undefined ? req.body.isActive : coupon.isActive;
 
         const updatedCoupon = await coupon.save();
@@ -70,9 +72,47 @@ const deleteCoupon = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Validate a coupon
+// @route   POST /api/coupons/validate
+// @access  Public (or Private to Users)
+const validateCoupon = asyncHandler(async (req, res) => {
+    const { code } = req.body;
+
+    const coupon = await Coupon.findOne({ code: code.toUpperCase() });
+
+    if (!coupon) {
+        res.status(404);
+        throw new Error('Invalid coupon code');
+    }
+
+    if (!coupon.isActive) {
+        res.status(400);
+        throw new Error('This coupon is no longer active');
+    }
+
+    if (new Date(coupon.expiryDate) < Date.now()) {
+        res.status(400);
+        throw new Error('This coupon has expired');
+    }
+
+    if (coupon.usedCount >= coupon.usageLimit) {
+        res.status(400);
+        throw new Error('This coupon has reached its usage limit');
+    }
+
+    res.json({
+        success: true,
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        minOrderAmount: coupon.minOrderAmount
+    });
+});
+
 module.exports = {
     createCoupon,
     getCoupons,
     updateCoupon,
-    deleteCoupon
+    deleteCoupon,
+    validateCoupon
 };

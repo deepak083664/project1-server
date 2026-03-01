@@ -105,6 +105,15 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         }
 
         const updatedOrder = await order.save();
+
+        // Emit socket event for real-time tracking
+        try {
+            const io = require('../config/socket').getIO();
+            io.to(req.params.id).emit('orderStatusUpdated', updatedOrder);
+        } catch (err) {
+            console.error('Socket error on order update:', err);
+        }
+
         res.status(200).json(updatedOrder);
     } else {
         res.status(404).json({ message: 'Order not found' });

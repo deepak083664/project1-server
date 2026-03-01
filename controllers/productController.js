@@ -196,6 +196,44 @@ const deleteReview = async (req, res) => {
     }
 };
 
+// @desc    Get recommended products based on category
+// @route   GET /api/products/:id/recommendations
+// @access  Public
+const getRecommendedProducts = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const recommendations = await Product.find({
+            _id: { $ne: product._id },
+            category: product.category
+        }).limit(4).sort({ averageRating: -1, numReviews: -1 });
+
+        res.json(recommendations);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error fetching recommendations' });
+    }
+};
+
+// @desc    Get popular products
+// @route   GET /api/products/theme/popular
+// @access  Public
+const getPopularProducts = async (req, res) => {
+    try {
+        const popular = await Product.find({})
+            .sort({ numReviews: -1, averageRating: -1 })
+            .limit(8);
+
+        res.json(popular);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error fetching popular products' });
+    }
+};
+
 module.exports = {
     createProduct,
     getProducts,
@@ -203,5 +241,7 @@ module.exports = {
     updateProduct,
     deleteProduct,
     createProductReview,
-    deleteReview
+    deleteReview,
+    getRecommendedProducts,
+    getPopularProducts
 };

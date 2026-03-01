@@ -90,4 +90,8 @@ const orderSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+// Indexes for user order history and analytics optimization
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ createdAt: -1, isPaid: 1 });
+
 module.exports = mongoose.model('Order', orderSchema);
