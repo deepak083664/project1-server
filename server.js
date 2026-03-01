@@ -10,6 +10,9 @@ connectDB();
 
 const app = express();
 
+// Enable if you're behind a reverse proxy (Render, Heroku, etc.)
+app.set('trust proxy', 1);
+
 const cookieParser = require('cookie-parser');
 const { apiLimiter } = require('./config/rateLimiter');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware'); // Import error handlers
@@ -20,20 +23,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })); // Important for fetching images
 
-// CORS configuration for production
-const allowedOrigins = [
-  'http://localhost:5173', // Local dev
-  process.env.CLIENT_URL   // Production frontend URL from Render
-].filter(Boolean); // Remove undefined if CLIENT_URL is not set
-
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: "*",
   credentials: true
 }));
 

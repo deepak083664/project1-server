@@ -42,7 +42,7 @@ A clean and working starter template for building backend applications with Node
    ```
 
 4. **Verify it Works**
-   Open your browser and navigate to `http://localhost:5000` or use an API client like Postman. You should see the response:
+   Open your browser and navigate to `https://project1-server-1.onrender.com` or use an API client like Postman. You should see the response:
    ```text
    Server Running
    ```
