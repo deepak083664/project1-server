@@ -12,16 +12,36 @@ const app = express();
 
 const cookieParser = require('cookie-parser');
 const { apiLimiter } = require('./config/rateLimiter');
+const { notFound, errorHandler } = require('./middleware/errorMiddleware'); // Import error handlers
+
+const mongoSanitize = require('express-mongo-sanitize');
 
 // Middleware
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" })); // Important for fetching images
+
+// CORS configuration for production
+const allowedOrigins = [
+  'http://localhost:5173', // Local dev
+  process.env.CLIENT_URL   // Production frontend URL from Render
+].filter(Boolean); // Remove undefined if CLIENT_URL is not set
+
 app.use(cors({
-  origin: 'http://localhost:5173', // Must specify origin for cookies
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
 app.use(express.json()); // Allow parsing of JSON bodies
 app.use(cookieParser());
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
 
 // Apply rate limiter to all api routes
 app.use('/api/', apiLimiter);
@@ -46,6 +66,10 @@ app.use('/api/wishlist', require('./routes/wishlist'));
 
 const root = path.resolve();
 app.use('/uploads', express.static(path.join(root, 'server/uploads')));
+
+// Error Handling Middlewares (MUST BE AT THE END OF ALL ROUTES)
+app.use(notFound);
+app.use(errorHandler);
 
 const http = require('http');
 const server = http.createServer(app);
